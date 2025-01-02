@@ -58,6 +58,17 @@ export function RentalCalendar({ rentals, currentMonth = new Date() }: RentalCal
     0
   ).getDate();
 
+  // Calculate the first day of the month (0 = Sunday, 1 = Monday, etc.)
+  const firstDayOfMonth = new Date(
+    selectedMonth.getFullYear(),
+    selectedMonth.getMonth(),
+    1
+  ).getDay();
+
+  // Calculate total cells needed (previous month days + current month days)
+  const totalDays = daysInMonth;
+  const totalCells = Math.ceil((totalDays + firstDayOfMonth) / 7) * 7;
+  
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   const getRentalsForDate = (day: number) => {
@@ -105,31 +116,43 @@ export function RentalCalendar({ rentals, currentMonth = new Date() }: RentalCal
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-px bg-gray-200">
+      <div className="grid grid-cols-7 gap-[2px] bg-gray-900">
         {WEEKDAYS.map((day, index) => (
           <div key={`weekday-${index}`} className="text-center text-[11px] sm:text-sm font-medium py-1.5 bg-white">
             <span className="sm:hidden">{day.short}</span>
             <span className="hidden sm:inline">{day.full}</span>
           </div>
         ))}
+        
+        {/* Empty cells for days before the first day of the month */}
+        {Array.from({ length: firstDayOfMonth }).map((_, index) => (
+          <div key={`empty-start-${index}`} className="bg-white h-32 sm:h-32" />
+        ))}
+        
+        {/* Current month days */}
         {days.map((day) => {
           const { morning, afternoon } = getRentalsForDate(day);
 
           return (
             <div key={`day-${day}`} className="relative h-32 sm:h-32 bg-white">
               <div className="absolute inset-0 flex flex-col">
-                <div className="text-[11px] sm:text-sm font-medium p-1 border-b border-gray-200">
+                <div className="text-[11px] sm:text-sm font-medium p-1 border-b border-gray-300">
                   {day}
                 </div>
                 <div className="flex-1 flex flex-col">
                   <PeriodCell rental={morning} />
-                  <div className="border-t border-dashed border-gray-300 opacity-50" />
+                  <div className="border-t border-dashed border-gray-200" />
                   <PeriodCell rental={afternoon} />
                 </div>
               </div>
             </div>
           );
         })}
+        
+        {/* Empty cells for days after the last day of the month */}
+        {Array.from({ length: totalCells - (firstDayOfMonth + daysInMonth) }).map((_, index) => (
+          <div key={`empty-end-${index}`} className="bg-white h-32 sm:h-32" />
+        ))}
       </div>
     </div>
   );

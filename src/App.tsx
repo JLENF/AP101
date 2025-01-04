@@ -59,7 +59,7 @@ function AppContent() {
   };
 
   if (!user) {
-    return <AuthModal onSuccess={() => {}} />;
+    return <AuthModal onSuccess={reloadRentals} />;
   }
 
   const renderContent = () => {
